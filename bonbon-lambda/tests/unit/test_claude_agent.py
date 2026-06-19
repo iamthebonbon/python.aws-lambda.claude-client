@@ -91,4 +91,4 @@ def test_lambda_handler_missing_prompt_returns_400():
     for event in [{"body": None}, {"body": json.dumps({})}]:
         ret = app.lambda_handler(event, "")
         assert ret["statusCode"] == 400
-        assert json.loads(ret["body"])["error"] == "prompt is required"
+        assert json.loads(ret["body"]) == {"error": "prompt is required"}
