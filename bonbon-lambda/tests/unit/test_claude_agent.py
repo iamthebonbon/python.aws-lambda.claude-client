@@ -87,17 +87,8 @@ def test_lambda_handler_returns_200():
     assert body["answer"] == "It is now."
 
 
-def test_lambda_handler_default_prompt():
-    event = {"body": None}
-
-    final_text_block = _make_text_block("UTC time.")
-    response = _make_response([final_text_block], "end_turn")
-
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = response
-
-    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
-        with patch("claude_agent.app.anthropic.Anthropic", return_value=mock_client):
-            ret = app.lambda_handler(event, "")
-
-    assert ret["statusCode"] == 200
+def test_lambda_handler_missing_prompt_returns_400():
+    for event in [{"body": None}, {"body": "{}"}, {"body": json.dumps({"prompt": ""})}]:
+        ret = app.lambda_handler(event, "")
+        assert ret["statusCode"] == 400
+        assert json.loads(ret["body"])["error"] == "prompt is required"
