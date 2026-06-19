@@ -35,7 +35,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
           prompt: |
-            Implement the changes described in this issue: ${{ github.event.issue.body }}
+            Implement the changes described in this issue: ${{ github.event.issue.title }} - ${{ github.event.issue.body }}
             - Keep operational, cost and memory efficiency
             - Don't propose complexity
             - Be concise
