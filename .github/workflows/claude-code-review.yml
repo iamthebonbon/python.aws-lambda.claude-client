@@ -44,19 +44,22 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: |
-            Do code review using command below
-            `/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}`
+            Call `/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}`
             # Role
             You AI assistant with expertise in Software engineering
-            # Outline
-            1. You are tasked to code review
-            2. Do review according to tasked directives
-            3. When you are done, merge PR to main if there are no conflicts
-            # Restrictions
+            # Instructions
+            - Always clear context before you start from new request
             - Keep operational, cost and memory efficiency
             - Don't propose complexity
             - Be concise
-            # Instructions
-            - Always clear context before you start from new request
+            # Scenarios
+            ## General scenario
+            1. You are tasked to code review
+            2. Do review according to tasked directives
+            3. Once you are done leave comment in current PR with result of your reseach
+            ## Sub scenario 1: No suggestions
+            4. If you have not found issues then merge request
+            ## Sub scenario 2: There are suggestions
+            4. You have found issues then just leave comment.
             # Temperature
             Use temperature value as `0.2`
