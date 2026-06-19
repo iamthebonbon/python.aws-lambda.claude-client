@@ -36,8 +36,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
-          additional_permissions: |
-            actions: read
           custom_instructions: |
             ## Instructions
             - Keep operational, cost and memory efficiency
