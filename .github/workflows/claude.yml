@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      issues: read
+      issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
@@ -34,10 +34,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
+          base_branch: main
           prompt: |
-            - Propose changes based on next description: ${{ github.event.issue.body }}.
-            - - Do all actions in new branch based from main
+            Implement the changes described in this issue: ${{ github.event.issue.body }}
             - Keep operational, cost and memory efficiency
             - Don't propose complexity
             - Be extremely concise
-            - Create PR once changes are done, commited and pushed
