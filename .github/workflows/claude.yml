@@ -38,7 +38,7 @@ jobs:
           show_full_output: true
           additional_permissions: |
             actions: read
-          prompt: |
+          custom_instructions: |
             ## Instructions
             - Keep operational, cost and memory efficiency
             - Don't propose complexity
