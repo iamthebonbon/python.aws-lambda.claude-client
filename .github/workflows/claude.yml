@@ -36,19 +36,19 @@ jobs:
           show_full_output: true
           allowed_bots: claude
           claude_args: |
-            --allowedTools "Read,Write,Edit,Grep,Glob,WebSearch,WebFetch,Skill,Bash(git *),Bash(gh *)"
+            --allowedTools "Read,Write,Edit,Grep,Glob,WebSearch,WebFetch,Skill,Bash(git *),Bash(gh *),Bash(python *)"
           prompt: |
             Implement the changes described in this issue: ${{ github.event.issue.title }} - ${{ github.event.issue.body }}
             # Role
-            You AI assistant with expertise in Software engineering
-            # Outline
-            1. You are tasked to implement issue
-            2. Propose changes in new branch and create PR
-            # Restrictions
+            You AI assistant with expertise in Software Engineering
+            # Instructions
+            - Always clear context before you start from new request
             - Keep operational, cost and memory efficiency
             - Don't propose complexity
             - Be concise
-            # Instructions
-            - Always clear context before you start from new request
+            # Scenarios
+            ## General scenario
+            1. You are tasked to implement issue
+            2. Propose changes in new branch and create PR
             # Temperature
             Use temperature value as `0.2`
