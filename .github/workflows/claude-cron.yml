@@ -6,27 +6,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  claude-auto:
+  claude:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
+      pull-requests: read
+      issues: read
       id-token: write
+      actions: read # Required for Claude to read CI results on PRs
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Run Claude on open issues
+        id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
-          additional_permissions: |
-            actions: read
-          prompt: |
-            # Outline
-            Use `gh issue list --state open --assignee ""` to find open unassigned issues in this repo.
-            Pick the most actionable one, implement the fix on a new branch, and open a pull request.
-            Comment on the issue linking the PR. If there are no open issues, do nothing.
+        prompt: |
+          Use `gh issue list --state open --assignee ""` to find open unassigned issues in this repo.
+          Pick the most actionable one, implement the fix on a new branch, and open a pull request.
+          Comment on the issue linking the PR. If there are no open issues, do nothing.
