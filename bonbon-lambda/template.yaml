@@ -33,6 +33,10 @@ Resources:
       Runtime: python3.14
       Architectures:
       - x86_64
+      Timeout: 30
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
       Events:
         HelloWorld:
           Type: Api
