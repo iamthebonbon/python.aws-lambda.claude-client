@@ -38,3 +38,9 @@ jobs:
           show_full_output: true
           additional_permissions: |
             actions: read
+          prompt: |
+            ## Instructions
+            - Keep operational, cost and memory efficiency
+            - Don't propose complexity
+            - Be extremely concise
+            - When changes are done create PR
