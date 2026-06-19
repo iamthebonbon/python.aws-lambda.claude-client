@@ -27,6 +27,7 @@ def run_agent(client: anthropic.Anthropic, prompt: str) -> dict:
         response = client.messages.create(
             model=MODEL,
             max_tokens=1024,
+            temperature=0.2,
             tools=TOOLS,
             messages=messages,
         )
