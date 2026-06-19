@@ -34,6 +34,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
+          allowed_bots: claude
+          claude_args: |
+            --allowedTools "Read,Write,Edit,Grep,Glob,WebSearch,WebFetch,Skill,Bash(git *),Bash(gh *)"
           prompt: |
             Implement the changes described in this issue: ${{ github.event.issue.title }} - ${{ github.event.issue.body }}
             - Keep operational, cost and memory efficiency
