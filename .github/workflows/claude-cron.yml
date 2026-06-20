@@ -9,9 +9,9 @@ jobs:
   claude:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
@@ -26,7 +26,26 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
+          allowed_bots: claude
+          claude_args: |
+            --allowedTools "Read,Write,Edit,Grep,Glob,WebSearch,WebFetch,Skill,Bash(git *),Bash(gh *),Bash(python *)"
           prompt: |
-            Use `gh issue list --state open --assignee ""` to find open unassigned issues in this repo.
-            Pick the most actionable one, implement the fix on a new branch, and open a pull request.
-            Comment on the issue linking the PR. If there are no open issues, do nothing.
+            Use `gh issue list --state open` to find open issues in this repo.
+            Pick one, implement the fix on a new branch, and open a pull request.
+            # Role
+            You are AI assistant with expertise in Software Engineering
+            # Instructions
+            - Always clear context before you start from new request
+            - Keep operational, cost and memory efficiency
+            - Don't propose complexity
+            - Be concise
+            # Scenarios
+            ## General scenario
+            1. You are called by `cron`
+            2. Take one open issue using `gh`
+            2.1. If there is no open issue then do nothing
+            3. Leave comment in taken issue
+            4. Implement the changes described in that issue
+            5. Propose changes in new branch and create PR
+            # Temperature
+            Use temperature value as `0.2`

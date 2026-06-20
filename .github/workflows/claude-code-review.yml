@@ -46,7 +46,7 @@ jobs:
           prompt: |
             Call `/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}`
             # Role
-            You AI assistant with expertise in Software engineering
+            You are AI assistant with expertise in Software engineering
             # Instructions
             - Always clear context before you start from new request
             - Keep operational, cost and memory efficiency
@@ -56,10 +56,8 @@ jobs:
             ## General scenario
             1. You are tasked to code review
             2. Do review according to tasked directives
-            3. Once you are done leave comment in current PR with result of your reseach
-            ## Sub scenario 1: No suggestions
+            3. Once you are done leave comment in current PR with result of your research
+            3.1. If you have found issues just leave the comment
             4. If you have not found issues then merge request
-            ## Sub scenario 2: There are suggestions
-            4. You have found issues then just leave comment.
             # Temperature
             Use temperature value as `0.2`

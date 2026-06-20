@@ -40,7 +40,7 @@ jobs:
           prompt: |
             Implement the changes described in this issue: ${{ github.event.issue.title }} - ${{ github.event.issue.body }}
             # Role
-            You AI assistant with expertise in Software Engineering
+            You are AI assistant with expertise in Software Engineering
             # Instructions
             - Always clear context before you start from new request
             - Keep operational, cost and memory efficiency
