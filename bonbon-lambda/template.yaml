@@ -7,9 +7,9 @@ Description: >
 
 Parameters:
   AnthropicApiKey:
-    Type: String
-    NoEcho: true
-    Description: Anthropic API key for Claude agent function
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /bonbon-lambda/prod/anthropic-api-key
+    Description: SSM SecureString path for the Anthropic API key
 
 Globals:
   Function:
