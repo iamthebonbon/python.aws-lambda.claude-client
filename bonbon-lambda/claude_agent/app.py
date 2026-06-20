@@ -65,7 +65,13 @@ def run_agent(client: anthropic.Anthropic, prompt: str) -> dict:
 
 def lambda_handler(event, context):
     body = json.loads(event.get("body") or "{}")
-    prompt = body.get("prompt", "What is the current UTC time?")
+    prompt = body.get("prompt")
+
+    if not prompt:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Missing required field: prompt"}),
+        }
 
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     result = run_agent(client, prompt)
