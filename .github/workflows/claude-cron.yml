@@ -44,8 +44,8 @@ jobs:
             1. You are called by `cron`
             2. Take one open issue using `gh`
             2.1. If there is no open issue then do nothing
-            3. Leave comment in taken issue
+            3. Leave comment in taken issue that issue is taken
             4. Implement the changes described in that issue
-            5. Propose changes in new branch and create PR
+            5. Propose changes in new branch and create PR with `closes issue` feature
             # Temperature
             Use temperature value as `0.2`

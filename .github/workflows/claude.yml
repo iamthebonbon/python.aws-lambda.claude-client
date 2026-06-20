@@ -49,6 +49,6 @@ jobs:
             # Scenarios
             ## General scenario
             1. You are tasked to implement issue
-            2. Propose changes in new branch and create PR
+            2. Propose changes in new branch and create PR with `closes issue` feature
             # Temperature
             Use temperature value as `0.2`
