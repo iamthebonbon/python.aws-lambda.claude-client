@@ -2,9 +2,23 @@ import json
 import datetime
 import os
 
+import boto3
 import anthropic
 
 MODEL = "claude-sonnet-4-6"
+
+_ssm = boto3.client("ssm")
+_api_key = None
+
+
+def _get_api_key() -> str:
+    global _api_key
+    if _api_key is None:
+        param = _ssm.get_parameter(
+            Name=os.environ["ANTHROPIC_API_KEY_PARAM"], WithDecryption=True
+        )
+        _api_key = param["Parameter"]["Value"]
+    return _api_key
 
 TOOLS = [
     {
@@ -73,7 +87,7 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Missing required field: prompt"}),
         }
 
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    client = anthropic.Anthropic(api_key=_get_api_key())
     result = run_agent(client, prompt)
 
     return {
