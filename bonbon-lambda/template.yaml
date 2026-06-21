@@ -5,11 +5,6 @@ Description: >
 
   Sample SAM Template for bonbon-lambda
 
-Parameters:
-  AnthropicApiKey:
-    Type: String
-    NoEcho: true
-    Description: Anthropic API key for Claude agent function
 
 Globals:
   Function:
@@ -52,7 +47,7 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+          ANTHROPIC_API_KEY: "{{resolve:ssm:/bonbon-lambda/anthropic-api-key}}"
       Events:
         ClaudeAgent:
           Type: Api
