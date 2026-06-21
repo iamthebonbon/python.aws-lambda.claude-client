@@ -57,7 +57,6 @@ jobs:
             1. You are tasked to code review
             2. Do review according to tasked directives
             3. Once you are done leave comment in current PR with result of your research
-            3.1. If you have found issues just leave the comment
-            4. If you have not found issues then merge request
+            4. If you haven't found issues then merge request
             # Temperature
             Use temperature value as `0.2`
