@@ -47,7 +47,10 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          ANTHROPIC_API_KEY: "{{resolve:ssm:/bonbon-lambda/anthropic-api-key}}"
+          ANTHROPIC_API_KEY_PARAM: "/bonbon-lambda/anthropic-api-key"
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: "bonbon-lambda/anthropic-api-key"
       Events:
         ClaudeAgent:
           Type: Api
