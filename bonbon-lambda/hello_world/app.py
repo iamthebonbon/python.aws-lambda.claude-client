@@ -1,10 +1,13 @@
 import json
 import datetime
+import logging
 import os
 
 import anthropic
 
-MODEL = "claude-sonnet-4-6"
+logger = logging.getLogger(__name__)
+
+MODEL = os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
 
 TOOLS = [
     {
@@ -19,6 +22,7 @@ def get_current_time() -> str:
 
 
 def run_agent(client: anthropic.Anthropic, prompt: str) -> dict:
+    logger.info("Using model: %s", MODEL)
     messages = [{"role": "user", "content": prompt}]
     trace = []
 
