@@ -28,6 +28,10 @@ Resources:
       Runtime: python3.14
       Architectures:
       - x86_64
+      Timeout: 30
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: "{{resolve:ssm:/bonbon-lambda/anthropic-api-key}}"
       Events:
         HelloWorld:
           Type: Api
@@ -35,27 +39,10 @@ Resources:
             Path: /hello
             Method: get
             RestApiId: !Ref BonBonApi
-
-  ClaudeAgentFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: claude_agent/
-      Handler: app.lambda_handler
-      Runtime: python3.14
-      Architectures:
-      - x86_64
-      Timeout: 30
-      Environment:
-        Variables:
-          ANTHROPIC_API_KEY_PARAM: "/bonbon-lambda/anthropic-api-key"
-      Policies:
-        - SSMParameterReadPolicy:
-            ParameterName: "bonbon-lambda/anthropic-api-key"
-      Events:
-        ClaudeAgent:
+        HelloWorldPost:
           Type: Api
           Properties:
-            Path: /agent
+            Path: /hello
             Method: post
             RestApiId: !Ref BonBonApi
 
@@ -98,9 +85,4 @@ Outputs:
   BonBonApiKeyId:
     Description: API Key ID (retrieve value via CLI or console)
     Value: !Ref BonBonApiKey
-  ClaudeAgentApi:
-    Description: API Gateway endpoint URL for Claude agent
-    Value: !Sub "https://${BonBonApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/agent/"
-  ClaudeAgentFunction:
-    Description: Claude Agent Lambda Function ARN
-    Value: !GetAtt ClaudeAgentFunction.Arn
+

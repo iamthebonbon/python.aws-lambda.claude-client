@@ -1,42 +1,81 @@
 import json
+import datetime
+import os
 
-# import requests
+import anthropic
+
+MODEL = "claude-sonnet-4-6"
+
+TOOLS = [
+    {
+        "name": "get_current_time",
+        "description": "Returns the current UTC date and time in ISO 8601 format.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    }
+]
+
+def get_current_time() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def run_agent(client: anthropic.Anthropic, prompt: str) -> dict:
+    messages = [{"role": "user", "content": prompt}]
+    trace = []
+
+    while True:
+        response = client.messages.create(
+            model=MODEL,
+            max_tokens=1024,
+            tools=TOOLS,
+            messages=messages,
+        )
+
+        # THINK: capture any text reasoning before acting
+        for block in response.content:
+            if block.type == "text":
+                trace.append({"phase": "THINK", "content": block.text})
+
+        if response.stop_reason == "end_turn":
+            final = next((b.text for b in response.content if b.type == "text"), "")
+            return {"answer": final, "trace": trace}
+
+        # ACT: execute each tool the model requested
+        tool_results = []
+        for block in response.content:
+            if block.type != "tool_use":
+                continue
+
+            trace.append({"phase": "ACT", "tool": block.name, "input": block.input})
+
+            if block.name == "get_current_time":
+                result = get_current_time()
+            else:
+                result = f"Unknown tool: {block.name}"
+
+            # OBSERVE: record what the tool returned
+            trace.append({"phase": "OBSERVE", "tool": block.name, "result": result})
+            tool_results.append(
+                {"type": "tool_result", "tool_use_id": block.id, "content": result}
+            )
+
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "user", "content": tool_results})
 
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    body = json.loads(event.get("body") or "{}")
+    prompt = body.get("prompt")
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
+    if not prompt:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Missing required field: prompt"}),
+        }
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    result = run_agent(client, prompt)
 
     return {
         "statusCode": 200,
-        "body": json.dumps({
-            "message": "hello world",
-            # "location": ip.text.replace("\n", "")
-        }),
+        "body": json.dumps(result),
     }
