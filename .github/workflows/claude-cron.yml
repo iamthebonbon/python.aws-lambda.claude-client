@@ -46,7 +46,8 @@ jobs:
             2.1. If there is no open issue then do nothing
             3. Leave comment in taken issue that issue is taken
             4. Implement the changes described in that issue
-						4.1. If you see that issue is complex create subissues to decompose current one. Create links between issues if it's possible and create label for these group of activities
+            4.1. If you see that issue is complex create subissues to decompose current one. 
+              Create links between issues if it's possible and create label for these group of activities
             5. Propose changes in new branch and create PR with `closes issue` feature
             # Temperature
             Use temperature value as `0.2`
