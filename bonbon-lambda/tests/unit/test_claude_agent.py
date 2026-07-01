@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from claude_agent import app
+from hello_world import app
 
 
 def _make_text_block(text):
@@ -69,6 +69,55 @@ def test_run_agent_think_before_tool():
     assert "OBSERVE" in phases
 
 
+def test_run_agent_returns_json_serializable_messages():
+    tool_block = _make_tool_use_block("tool-1", "get_current_time", {})
+    final_text_block = _make_text_block("It is now.")
+
+    first_response = _make_response([tool_block], "tool_use")
+    second_response = _make_response([final_text_block], "end_turn")
+
+    client = MagicMock()
+    client.messages.create.side_effect = [first_response, second_response]
+
+    result = app.run_agent(client, "What time is it?")
+
+    # Must round-trip through JSON so it can be returned and resent as-is.
+    messages = json.loads(json.dumps(result["messages"]))
+    assert messages[0] == {"role": "user", "content": "What time is it?"}
+    assert messages[1]["role"] == "assistant"
+    assert messages[1]["content"][0] == {
+        "type": "tool_use",
+        "id": "tool-1",
+        "name": "get_current_time",
+        "input": {},
+    }
+    assert messages[2]["role"] == "user"
+    assert messages[2]["content"][0]["type"] == "tool_result"
+    assert messages[3] == {
+        "role": "assistant",
+        "content": [{"type": "text", "text": "It is now."}],
+    }
+
+
+def test_run_agent_continues_conversation_from_history():
+    history = [
+        {"role": "user", "content": "Hi"},
+        {"role": "assistant", "content": [{"type": "text", "text": "Hello!"}]},
+    ]
+    final_text_block = _make_text_block("It is now.")
+    response = _make_response([final_text_block], "end_turn")
+
+    client = MagicMock()
+    client.messages.create.return_value = response
+
+    result = app.run_agent(client, "What time is it?", history)
+
+    assert result["messages"][:2] == history
+    assert result["messages"][2] == {"role": "user", "content": "What time is it?"}
+    sent_messages = client.messages.create.call_args.kwargs["messages"]
+    assert sent_messages[:2] == history
+
+
 def test_lambda_handler_returns_200():
     event = {"body": json.dumps({"prompt": "What time is it?"})}
 
@@ -79,12 +128,37 @@ def test_lambda_handler_returns_200():
     mock_client.messages.create.return_value = response
 
     with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
-        with patch("claude_agent.app.anthropic.Anthropic", return_value=mock_client):
+        with patch("hello_world.app.anthropic.Anthropic", return_value=mock_client):
             ret = app.lambda_handler(event, "")
 
     assert ret["statusCode"] == 200
     body = json.loads(ret["body"])
     assert body["answer"] == "It is now."
+    assert body["messages"][-1]["content"][0]["text"] == "It is now."
+
+
+def test_lambda_handler_resends_messages_to_continue_conversation():
+    history = [
+        {"role": "user", "content": "Hi"},
+        {"role": "assistant", "content": [{"type": "text", "text": "Hello!"}]},
+    ]
+    event = {
+        "body": json.dumps({"prompt": "What time is it?", "messages": history})
+    }
+
+    final_text_block = _make_text_block("It is now.")
+    response = _make_response([final_text_block], "end_turn")
+
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = response
+
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("hello_world.app.anthropic.Anthropic", return_value=mock_client):
+            ret = app.lambda_handler(event, "")
+
+    assert ret["statusCode"] == 200
+    sent_messages = mock_client.messages.create.call_args.kwargs["messages"]
+    assert sent_messages[:2] == history
 
 
 def test_lambda_handler_missing_prompt_returns_400():
@@ -93,3 +167,13 @@ def test_lambda_handler_missing_prompt_returns_400():
         assert ret["statusCode"] == 400
         body = json.loads(ret["body"])
         assert "error" in body
+
+
+def test_lambda_handler_invalid_messages_type_returns_400():
+    event = {"body": json.dumps({"prompt": "Hi", "messages": "not-a-list"})}
+
+    ret = app.lambda_handler(event, "")
+
+    assert ret["statusCode"] == 400
+    body = json.loads(ret["body"])
+    assert "error" in body
